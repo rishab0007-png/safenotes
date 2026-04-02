@@ -2,17 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cloud Notes Panel</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     
     <style>
+        * { box-sizing: border-box; }
+
         :root {
             --on: 0; 
             --bg-dark: #121417;
-            --bg-light: #1c1f24;
             --primary: #d4af37;
             --panel-bg: rgba(255, 255, 255, 0.05);
             --panel-border: rgba(255, 255, 255, 0.1);
@@ -20,35 +21,72 @@
             --text-muted: #888;
         }
 
-        body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-dark); color: var(--text-main); height: 100vh; overflow-x: hidden; }
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
         button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
         input, textarea { outline: none; font-family: inherit; }
 
+        /* --- ALL-OVER AMBIENT LIGHTING --- */
+        .ambient-light {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at 35% 25%, rgba(255, 235, 170, 0.5) 0%, rgba(255, 220, 140, 0.25) 40%, rgba(255, 200, 100, 0.05) 80%, transparent 100%);
+            opacity: var(--on);
+            transition: opacity 0.6s ease-in-out;
+            pointer-events: none;
+            z-index: 1;
+        }
+
         /* --- AUTH VIEW & LAMP --- */
-        #auth-view { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; position: absolute; top: 0; left: 0; z-index: 10; background: var(--bg-dark); transition: opacity 0.5s; }
-        .lamp-container { position: absolute; left: 20%; top: 25%; display: flex; flex-direction: column; align-items: center; z-index: 10; }
-        .lamp-head { width: 120px; height: 60px; background: #e0e0e0; border-radius: 60px 60px 0 0; box-shadow: inset 0 -5px 15px rgba(0,0,0,0.2); position: relative; z-index: 5; }
-        .lamp-stand { width: 8px; height: 100px; background: #666; z-index: 1; }
-        .lamp-base { width: 60px; height: 12px; background: #e0e0e0; border-radius: 10px 10px 0 0; }
-        #physics-canvas { position: absolute; top: 55px; left: 70px; width: 150px; height: 300px; z-index: 15; }
-        .light-beam { position: absolute; top: 60px; width: 400px; height: 500px; background: linear-gradient(to bottom, rgba(255, 255, 220, 0.35), transparent); clip-path: polygon(35% 0, 65% 0, 100% 100%, 0 100%); opacity: var(--on); transition: opacity 0.3s ease; pointer-events: none; z-index: 2; }
+        #auth-view { width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: 10; background: transparent; transition: opacity 0.5s; overflow: hidden;}
+        
+        .lamp-container { position: absolute; left: 25%; top: 15%; display: flex; flex-direction: column; align-items: center; z-index: 10; }
+        
+        .lamp-shade {
+            width: 180px; 
+            height: 110px; 
+            background: linear-gradient(to bottom, #fdfbf1, #e3d5a8); 
+            clip-path: polygon(25% 0, 75% 0, 100% 100%, 0 100%);
+            border-radius: 4px;
+            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.1);
+            z-index: 5; 
+            position: relative;
+        }
+        
+        .lamp-stand-top { width: 22px; height: 14px; background: linear-gradient(to right, #8b6914, #f4d068, #8b6914); border-radius: 4px; margin-top: 2px; }
+        .lamp-stand-middle { width: 45px; height: 60px; background: linear-gradient(to right, #6b4e07, #d4af37, #6b4e07); border-radius: 50% 50% 40% 40%; }
+        .lamp-stand-bottom { width: 35px; height: 35px; background: linear-gradient(to right, #8b6914, #f4d068, #8b6914); clip-path: polygon(15% 0, 85% 0, 100% 100%, 0 100%); }
+        .lamp-base-pedestal { width: 65px; height: 8px; background: #b08d25; border-radius: 3px 3px 0 0; }
+        .lamp-base { width: 140px; height: 15px; background: linear-gradient(to right, #5c4505, #cfa830, #5c4505); border-radius: 10px 10px 2px 2px; }
+        
+        #physics-canvas { 
+            position: absolute; 
+            top: 105px; 
+            right: 15px; 
+            width: 80px; 
+            height: 120px; 
+            z-index: 15; 
+            touch-action: none; 
+        }
 
         /* --- LOGIN BOX --- */
-        .auth-box { position: relative; background: var(--panel-bg); backdrop-filter: blur(10px); padding: 40px; border-radius: 15px; width: 320px; border: 1px solid var(--panel-border); box-shadow: 0 15px 35px rgba(0,0,0,0.5); margin-left: 15%; opacity: 0; transform: translateY(20px); visibility: hidden; transition: all 0.5s; z-index: 5; }
-        .auth-box.active { opacity: 1; transform: translateY(0); visibility: visible; }
+        .auth-box { position: absolute; top: 50%; left: 65%; transform: translate(-50%, -40%); background: var(--panel-bg); backdrop-filter: blur(15px); padding: 40px; border-radius: 15px; width: 340px; border: 1px solid var(--panel-border); box-shadow: 0 15px 35px rgba(0,0,0,0.6); opacity: 0; visibility: hidden; transition: all 0.5s; z-index: 5; }
+        .auth-box.active { opacity: 1; transform: translate(-50%, -50%); visibility: visible; box-shadow: 0 20px 50px rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.3); }
         .auth-box h2 { text-align: center; margin-top: 0; color: var(--primary); }
         .input-group { margin-bottom: 20px; }
         .input-group label { display: block; margin-bottom: 5px; font-size: 13px; color: var(--text-muted); }
-        .input-group input { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--panel-border); border-radius: 6px; color: white; box-sizing: border-box; }
-        .input-group input:focus { border-color: var(--primary); }
+        .input-group input { width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--panel-border); border-radius: 6px; color: white; transition: 0.3s; }
+        .input-group input:focus { border-color: var(--primary); background: rgba(0,0,0,0.7); }
         .auth-btn { width: 100%; padding: 12px; background: var(--primary); color: #000; font-weight: bold; border-radius: 6px; font-size: 16px; margin-top: 10px; display: flex; justify-content: center; align-items: center;}
-        .auth-btn:hover { background: #ebd169; }
+        .auth-btn:hover { background: #ebd169; transform: translateY(-2px); }
         .toggle-auth { text-align: center; margin-top: 15px; font-size: 13px; color: var(--text-muted); cursor: pointer; }
         .toggle-auth:hover { color: var(--text-main); text-decoration: underline; }
         #auth-msg { text-align: center; margin-top: 10px; font-size: 14px; color: #ff6b6b; min-height: 20px; }
 
         /* --- DASHBOARD VIEW --- */
-        #dashboard-view { display: none; padding: 30px; max-width: 1200px; margin: 0 auto; }
+        #dashboard-view { display: none; padding: 30px; max-width: 1200px; margin: 0 auto; position: relative; z-index: 5; }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
         .header h1 { margin: 0; font-size: 24px; }
         .header-actions { display: flex; gap: 15px; }
@@ -61,18 +99,18 @@
         .note-tile { background: #1a1d24; border-radius: 10px; padding: 20px; cursor: pointer; border-left: 5px solid var(--primary); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; min-height: 150px; border: 1px solid #2a2e38; border-left-width: 5px; }
         .note-tile:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
         .note-title { font-size: 18px; font-weight: bold; margin: 0 0 10px 0; }
-        .note-preview { color: #bbb; font-size: 14px; flex-grow: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; line-height: 1.5;}
+        .note-preview { color: #bbb; font-size: 14px; flex-grow: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; line-height: 1.5; white-space: pre-wrap;}
         .note-date { font-size: 11px; color: var(--text-muted); margin-top: 15px; text-align: right; }
 
         /* --- MODALS --- */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); justify-content: center; align-items: center; z-index: 100; }
-        .modal-content { background: #1c1f26; width: 90%; max-width: 600px; border-radius: 12px; padding: 30px; border: 1px solid #333; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-        #modal-title { background: transparent; border: none; border-bottom: 1px solid #444; color: white; font-size: 22px; padding: 10px 0; font-weight: bold; }
-        #modal-body { background: #121417; border: 1px solid #333; color: white; padding: 15px; border-radius: 8px; height: 250px; resize: none; font-size: 15px; line-height: 1.6; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); justify-content: center; align-items: center; z-index: 100; padding: 15px; }
+        .modal-content { background: #1c1f26; width: 100%; max-width: 600px; border-radius: 12px; padding: 30px; border: 1px solid #333; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        #modal-title { background: transparent; border: none; border-bottom: 1px solid #444; color: white; font-size: 22px; padding: 10px 0; font-weight: bold; width: 100%; }
+        #modal-body { background: #121417; border: 1px solid #333; color: white; padding: 15px; border-radius: 8px; height: 250px; resize: none; font-size: 15px; line-height: 1.6; width: 100%; }
         .color-picker { display: flex; gap: 10px; margin-bottom: 10px; }
         .color-dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
         .color-dot.active { border-color: white; transform: scale(1.1); }
-        .modal-actions { display: flex; justify-content: space-between; margin-top: 10px; }
+        .modal-actions { display: flex; justify-content: space-between; margin-top: 10px; width: 100%; }
         .modal-right-btns { display: flex; gap: 10px; }
         .btn-danger { background: transparent; border: 1px solid #ff6b6b; color: #ff6b6b; padding: 8px 16px; border-radius: 6px; }
         .btn-danger:hover { background: rgba(255, 107, 107, 0.1); }
@@ -81,20 +119,42 @@
         .recovery-content h2 { color: var(--primary); margin-top: 0; text-align: center; }
         #rec-msg { text-align: center; color: #ff6b6b; font-size: 14px; min-height: 20px; margin-bottom: 10px; }
         
-        /* Loading Spinner */
-        .loader { border: 4px solid rgba(0,0,0,0.1); border-left-color: #000; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; margin: 0 auto; display: none; }
+        .loader { border: 4px solid rgba(0,0,0,0.1); border-left-color: #d4af37; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; margin: 0 auto; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* =========================================
+           MOBILE RESPONSIVE CSS
+           ========================================= */
+        @media (max-width: 768px) {
+            .lamp-container { left: 50%; transform: translateX(-50%); top: 8vh; }
+            .ambient-light { background: radial-gradient(circle at 50% 15%, rgba(255, 235, 170, 0.5) 0%, rgba(255, 220, 140, 0.25) 50%, rgba(255, 200, 100, 0.05) 90%, transparent 100%); }
+            .auth-box { top: 45vh; left: 50%; transform: translate(-50%, 20px); width: 90%; max-width: 380px; padding: 25px 20px; }
+            .auth-box.active { transform: translate(-50%, 0); }
+            #dashboard-view { padding: 15px; }
+            .header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .header h1 { font-size: 20px; word-break: break-all; }
+            .header-actions { width: 100%; justify-content: space-between; }
+            .notes-grid { grid-template-columns: 1fr; gap: 15px; }
+            .modal-content { padding: 20px; }
+            .modal-actions { flex-direction: column-reverse; gap: 15px; }
+            .modal-right-btns { width: 100%; justify-content: space-between; }
+            .btn-danger { width: 100%; }
+        }
     </style>
 </head>
 <body>
+    
+    <div class="ambient-light"></div>
 
     <div id="auth-view">
         <div class="lamp-container">
-            <div class="lamp-head"></div>
+            <div class="lamp-shade"></div>
             <div id="physics-canvas"></div> 
-            <div class="lamp-stand"></div>
+            <div class="lamp-stand-top"></div>
+            <div class="lamp-stand-middle"></div>
+            <div class="lamp-stand-bottom"></div>
+            <div class="lamp-base-pedestal"></div>
             <div class="lamp-base"></div>
-            <div class="light-beam"></div>
         </div>
 
         <div class="auth-box" id="auth-box">
@@ -127,7 +187,7 @@
                 <input type="email" id="rec-email" placeholder="you@example.com">
             </div>
             <div id="rec-msg"></div>
-            <div class="modal-actions" style="justify-content: space-between;">
+            <div class="modal-actions" style="flex-direction: row; justify-content: space-between;">
                 <button class="btn-outline" id="cancel-rec-btn" style="color: white; border-color: #555;">Cancel</button>
                 <button class="btn-fill" id="send-rec-btn">Send Email</button>
             </div>
@@ -136,7 +196,7 @@
 
     <div id="dashboard-view">
         <div class="header">
-            <h1>Notes Panel <span id="display-user" style="color: var(--primary); font-size:16px; margin-left:10px;"></span></h1>
+            <h1>Notes Panel <span id="display-user" style="color: var(--primary); font-size:16px; margin-left:10px; display:block; margin-top:5px;"></span></h1>
             <div class="header-actions">
                 <button class="btn-outline" id="logout-btn">Log Out</button>
                 <button class="btn-fill" id="new-note-btn">+ Add Note</button>
@@ -158,7 +218,7 @@
             <textarea id="modal-body" placeholder="Write your note here..."></textarea>
             <div class="modal-actions">
                 <button class="btn-danger" id="delete-note-btn" style="display: none;">Delete</button>
-                <div style="flex-grow: 1;"></div> 
+                <div style="flex-grow: 1;" class="spacer"></div> 
                 <div class="modal-right-btns">
                     <button class="btn-outline" id="close-modal-btn" style="color: white; border-color: #555;">Cancel</button>
                     <button class="btn-fill" id="save-note-btn">Save Note</button>
@@ -168,12 +228,10 @@
     </div>
 
     <script type="module">
-        // Import Firebase SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, query, where, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // --- YOUR FIREBASE CONFIGURATION ---
         const firebaseConfig = {
             apiKey: "AIzaSyCbBShuzkGruBWb8i0ESmnvP9bT14j9kU8",
             authDomain: "notes-app-a8a4b.firebaseapp.com",
@@ -184,12 +242,10 @@
             measurementId: "G-2YSRSW8B7S"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Global State
         let currentUser = null;
         let notes = [];
         let editingNoteId = null; 
@@ -206,33 +262,82 @@
             root.style.setProperty("--on", isOn ? 1 : 0);
             if (isOn) {
                 authBox.classList.add("active");
-                gsap.to("body", { backgroundColor: "#1c1f24", duration: 0.6 });
+                gsap.to("body", { backgroundColor: "#26231c", duration: 0.6 });
             } else {
                 authBox.classList.remove("active");
                 gsap.to("body", { backgroundColor: "#121417", duration: 0.6 });
             }
         }
 
-        const Engine = Matter.Engine, Render = Matter.Render, Runner = Matter.Runner, Composites = Matter.Composites, MouseConstraint = Matter.MouseConstraint, Mouse = Matter.Mouse, Composite = Matter.Composite, Constraint = Matter.Constraint, Bodies = Matter.Bodies, Events = Matter.Events;
-        const engine = Engine.create(); const world = engine.world;
-        const render = Render.create({ element: document.getElementById('physics-canvas'), engine: engine, options: { width: 150, height: 300, wireframes: false, background: 'transparent' } });
-        Render.run(render); Runner.run(Runner.create(), engine);
-        const group = Matter.Body.nextGroup(true);
-        const rope = Composites.stack(30, 0, 1, 8, 0, 4, (x, y) => Bodies.circle(x, y, 3, { collisionFilter: { group: group }, render: { fillStyle: '#888888' }, density: 0.05 }));
-        Composites.chain(rope, 0, 0.5, 0, -0.5, { stiffness: 1, length: 2, render: { visible: false } });
-        Composite.add(rope, Constraint.create({ bodyA: rope.bodies[0], pointB: { x: 30, y: 0 }, pointA: { x: 0, y: 0 }, stiffness: 1, render: { visible: false } }));
-        const handle = Bodies.rectangle(30, 120, 14, 28, { chamfer: { radius: 5 }, render: { fillStyle: '#d4af37' }, density: 0.2, frictionAir: 0.05 });
-        Composite.add(world, Constraint.create({ bodyA: rope.bodies[7], bodyB: handle, pointA: { x: 0, y: 3 }, pointB: { x: 0, y: -10 }, stiffness: 1, render: { visible: false } }));
-        Composite.add(world, [rope, handle]);
+        const Engine = Matter.Engine, Render = Matter.Render, Runner = Matter.Runner, MouseConstraint = Matter.MouseConstraint, Mouse = Matter.Mouse, Composite = Matter.Composite, Constraint = Matter.Constraint, Bodies = Matter.Bodies, Events = Matter.Events;
+        
+        const engine = Engine.create(); 
+        const world = engine.world;
+        const canvasElement = document.getElementById('physics-canvas');
+        
+        const render = Render.create({ 
+            element: canvasElement, 
+            engine: engine, 
+            options: { width: 80, height: 120, wireframes: false, background: 'transparent' } 
+        });
+        
+        Render.run(render); 
+        Runner.run(Runner.create(), engine);
+        
+        const handle = Bodies.rectangle(40, 60, 10, 24, { 
+            chamfer: { radius: 3 }, 
+            render: { fillStyle: '#d4af37' }, 
+            density: 0.1, 
+            frictionAir: 0.08 
+        });
+        
+        const spring = Constraint.create({
+            pointA: { x: 40, y: 0 }, 
+            bodyB: handle,
+            pointB: { x: 0, y: -12 }, 
+            stiffness: 0.05, 
+            damping: 0.05,
+            render: { visible: true, strokeStyle: '#d4af37', lineWidth: 2 } 
+        });
+
+        Composite.add(world, [handle, spring]);
+        
         const mouse = Mouse.create(render.canvas);
-        const mouseConstraint = MouseConstraint.create(engine, { mouse: mouse, constraint: { stiffness: 0.2, render: { visible: false } } });
+        const mouseConstraint = MouseConstraint.create(engine, { 
+            mouse: mouse, 
+            constraint: { stiffness: 0.2, render: { visible: false } } 
+        });
+        
         mouseConstraint.mouse.element.removeEventListener("mousewheel", mouseConstraint.mouse.mousewheel);
         mouseConstraint.mouse.element.removeEventListener("DOMMouseScroll", mouseConstraint.mouse.mousewheel);
-        Composite.add(world, mouseConstraint); render.mouse = mouse; 
-        let restingY = handle.position.y; let isPulled = false;
+        Composite.add(world, mouseConstraint); 
+        render.mouse = mouse; 
+
+        // --- BUG FIX: RELEASE STRING IF CURSOR LEAVES CANVAS ---
+        function releaseString() {
+            if (mouseConstraint.body) {
+                mouseConstraint.body = null;
+                mouseConstraint.constraint.bodyB = null;
+            }
+        }
+
+        window.addEventListener('mouseup', releaseString);
+        window.addEventListener('touchend', releaseString);
+        canvasElement.addEventListener('mouseleave', releaseString);
+        
+        let restingY = 60; 
+        let isPulled = false;
+        
         Events.on(engine, 'beforeUpdate', () => {
-            if (handle.position.y > restingY + 25 && !isPulled) { isPulled = true; toggleLight(); } 
-            else if (handle.position.y < restingY + 10 && isPulled) { isPulled = false; }
+            Matter.Body.setPosition(handle, { x: 40, y: handle.position.y });
+            Matter.Body.setVelocity(handle, { x: 0, y: handle.velocity.y });
+
+            if (handle.position.y > restingY + 25 && !isPulled) { 
+                isPulled = true; 
+                toggleLight(); 
+            } else if (handle.position.y < restingY + 10 && isPulled) { 
+                isPulled = false; 
+            }
         });
 
         // --- AUTHENTICATION UI LOGIC ---
@@ -259,7 +364,6 @@
             authMsg.innerText = "";
         });
 
-        // --- FIREBASE LOGIN / SIGNUP ---
         authBtn.addEventListener('click', () => {
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
@@ -271,20 +375,21 @@
             if (isLoginMode) {
                 signInWithEmailAndPassword(auth, email, password)
                     .catch((error) => {
+                        console.error(error);
                         setLoading(false);
                         authMsg.innerText = "Invalid credentials. Try again.";
-                        gsap.fromTo("#auth-box", { x: -10 }, { x: 10, duration: 0.1, yoyo: true, repeat: 3, onComplete: () => gsap.set("#auth-box", {x: 0}) });
+                        gsap.fromTo("#auth-box", { x: "-50%", marginLeft: -10 }, { x: "-50%", marginLeft: 10, duration: 0.1, yoyo: true, repeat: 3, onComplete: () => gsap.set("#auth-box", {marginLeft: 0}) });
                     });
             } else {
                 createUserWithEmailAndPassword(auth, email, password)
                     .catch((error) => {
+                        console.error(error);
                         setLoading(false);
                         authMsg.innerText = error.message.replace("Firebase: ", "");
                     });
             }
         });
 
-        // --- FIREBASE PASSWORD RESET ---
         document.getElementById('forgot-pass').addEventListener('click', () => {
             document.getElementById('recovery-modal').style.display = "flex";
             document.getElementById('rec-msg').innerText = "";
@@ -309,109 +414,148 @@
                 });
         });
 
-        // --- FIREBASE AUTH STATE OBSERVER ---
+        // --- FIREBASE AUTH STATE LOGIC ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                document.getElementById('display-user').innerText = user.email;
+                document.getElementById('display-user').innerText = `(${user.email})`;
                 document.getElementById('email').value = ""; document.getElementById('password').value = "";
                 setLoading(false);
                 document.getElementById('auth-view').style.opacity = "0";
                 setTimeout(() => {
                     document.getElementById('auth-view').style.display = "none";
                     document.getElementById('dashboard-view').style.display = "block";
-                    document.getElementById('auth-view').style.opacity = "1";
                     fetchNotesFromCloud();
                 }, 500);
             } else {
-                currentUser = null; notes = [];
-                document.getElementById('notes-grid').innerHTML = "";
+                currentUser = null;
                 document.getElementById('dashboard-view').style.display = "none";
-                document.getElementById('auth-view').style.display = "flex";
-                if(isOn) toggleLight();
+                document.getElementById('auth-view').style.display = "block";
+                document.getElementById('auth-view').style.opacity = "1";
             }
         });
 
+        // --- NOTES CRUD LOGIC ---
+        const notesGrid = document.getElementById('notes-grid');
+        const noteModal = document.getElementById('note-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+        const deleteNoteBtn = document.getElementById('delete-note-btn');
+        const colorDots = document.querySelectorAll('.color-dot');
+
         document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
 
-        // --- CLOUD FIRESTORE (NOTES LOGIC) ---
+        document.getElementById('new-note-btn').addEventListener('click', () => {
+            editingNoteId = null;
+            modalTitle.value = "";
+            modalBody.value = "";
+            deleteNoteBtn.style.display = "none";
+            noteModal.style.display = "flex";
+        });
+
+        document.getElementById('close-modal-btn').addEventListener('click', () => {
+            noteModal.style.display = "none";
+        });
+
+        colorDots.forEach(dot => {
+            dot.addEventListener('click', (e) => {
+                colorDots.forEach(d => d.classList.remove('active'));
+                e.target.classList.add('active');
+                selectedColor = e.target.getAttribute('data-color');
+            });
+        });
+
         async function fetchNotesFromCloud() {
-            if(!currentUser) return;
-            const q = query(collection(db, "notes"), where("uid", "==", currentUser.uid));
+            if (!currentUser) return;
+            notesGrid.innerHTML = '<div class="loader" style="display:block; margin-top:50px;"></div>';
             try {
+                const q = query(collection(db, "notes"), where("userId", "==", currentUser.uid));
                 const querySnapshot = await getDocs(q);
                 notes = [];
                 querySnapshot.forEach((doc) => {
                     notes.push({ id: doc.id, ...doc.data() });
                 });
+                
+                notes.sort((a, b) => b.createdAt - a.createdAt);
                 renderNotes();
-            } catch (error) {
-                console.error("Error fetching notes:", error);
-                document.getElementById('notes-grid').innerHTML = "<p style='color:#ff6b6b; grid-column: 1/-1;'>Could not load notes. Make sure Firestore is enabled in Firebase!</p>";
+            } catch (e) {
+                console.error("Error fetching notes: ", e);
+                notesGrid.innerHTML = '<p style="color:#ff6b6b">Error loading notes.</p>';
             }
         }
 
         function renderNotes() {
-            const grid = document.getElementById('notes-grid');
-            grid.innerHTML = ""; 
-            if (notes.length === 0) return grid.innerHTML = "<p style='color:#888; grid-column: 1/-1;'>No notes yet. Click '+ Add Note' to create one!</p>";
-
-            for (let i = notes.length - 1; i >= 0; i--) {
-                const note = notes[i];
+            notesGrid.innerHTML = "";
+            if (notes.length === 0) {
+                notesGrid.innerHTML = '<p style="color:var(--text-muted);">No notes yet. Click "+ Add Note" to create one.</p>';
+                return;
+            }
+            notes.forEach(note => {
                 const tile = document.createElement('div');
-                tile.className = 'note-tile'; tile.style.borderLeftColor = note.color;
-                let preview = note.body.replace(/\n/g, "<br>");
-                tile.innerHTML = `<h3 class="note-title">${note.title || "Untitled"}</h3><div class="note-preview">${preview}</div><div class="note-date">${note.date}</div>`;
-                tile.addEventListener('click', () => openModal(note.id));
-                grid.appendChild(tile);
-            }
+                tile.className = "note-tile";
+                tile.style.borderColor = "#2a2e38";
+                tile.style.borderLeftColor = note.color;
+                tile.innerHTML = `
+                    <h3 class="note-title">${note.title || "Untitled"}</h3>
+                    <div class="note-preview">${note.content}</div>
+                    <div class="note-date">${new Date(note.createdAt).toLocaleDateString()}</div>
+                `;
+                tile.addEventListener('click', () => openEditModal(note));
+                notesGrid.appendChild(tile);
+            });
         }
 
-        // --- NOTE MODAL LOGIC ---
-        const noteModal = document.getElementById('note-modal');
-        const colorDots = document.querySelectorAll('.color-dot');
-        colorDots.forEach(dot => { dot.addEventListener('click', (e) => { colorDots.forEach(d => d.classList.remove('active')); e.target.classList.add('active'); selectedColor = e.target.getAttribute('data-color'); }); });
-        
-        function setModalColor(hex) { selectedColor = hex; colorDots.forEach(dot => { dot.classList.toggle('active', dot.getAttribute('data-color') === hex); }); }
-
-        function openModal(noteId = null) {
-            editingNoteId = noteId; noteModal.style.display = "flex";
-            if (noteId) {
-                const n = notes.find(x => x.id === noteId);
-                document.getElementById('modal-title').value = n.title; document.getElementById('modal-body').value = n.body; setModalColor(n.color); document.getElementById('delete-note-btn').style.display = "block"; 
-            } else {
-                document.getElementById('modal-title').value = ""; document.getElementById('modal-body').value = ""; setModalColor("#d4af37"); document.getElementById('delete-note-btn').style.display = "none"; 
-            }
+        function openEditModal(note) {
+            editingNoteId = note.id;
+            modalTitle.value = note.title;
+            modalBody.value = note.content;
+            selectedColor = note.color || "#d4af37";
+            colorDots.forEach(d => {
+                d.classList.toggle('active', d.getAttribute('data-color') === selectedColor);
+            });
+            deleteNoteBtn.style.display = "block";
+            noteModal.style.display = "flex";
         }
-
-        document.getElementById('new-note-btn').addEventListener('click', () => openModal(null));
-        document.getElementById('close-modal-btn').addEventListener('click', () => noteModal.style.display = "none");
 
         document.getElementById('save-note-btn').addEventListener('click', async () => {
-            const titleVal = document.getElementById('modal-title').value.trim(); 
-            const bodyVal = document.getElementById('modal-body').value.trim();
-            if (!titleVal && !bodyVal) return noteModal.style.display = "none";
+            if (!currentUser) return;
+            const title = modalTitle.value.trim();
+            const content = modalBody.value.trim();
+            if (!content && !title) return;
 
-            const now = new Date(); const dateStr = now.toLocaleDateString() + " " + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            document.getElementById('save-note-btn').innerText = "Saving...";
+            const noteData = {
+                userId: currentUser.uid,
+                title: title,
+                content: content,
+                color: selectedColor,
+                createdAt: editingNoteId ? notes.find(n => n.id === editingNoteId).createdAt : Date.now()
+            };
 
-            if (editingNoteId) {
-                const noteRef = doc(db, "notes", editingNoteId);
-                await updateDoc(noteRef, { title: titleVal, body: bodyVal, color: selectedColor, date: "Edited: " + dateStr });
-            } else {
-                await addDoc(collection(db, "notes"), { uid: currentUser.uid, title: titleVal, body: bodyVal, color: selectedColor, date: dateStr });
-            }
-
-            document.getElementById('save-note-btn').innerText = "Save Note";
             noteModal.style.display = "none";
-            fetchNotesFromCloud();
+            notesGrid.innerHTML = '<div class="loader" style="display:block; margin-top:50px;"></div>';
+
+            try {
+                if (editingNoteId) {
+                    await updateDoc(doc(db, "notes", editingNoteId), noteData);
+                } else {
+                    await addDoc(collection(db, "notes"), noteData);
+                }
+                fetchNotesFromCloud();
+            } catch (e) {
+                console.error("Error saving note: ", e);
+            }
         });
 
-        document.getElementById('delete-note-btn').addEventListener('click', async () => {
-            if (confirm("Are you sure you want to delete this note?")) {
+        deleteNoteBtn.addEventListener('click', async () => {
+            if (!editingNoteId) return;
+            noteModal.style.display = "none";
+            notesGrid.innerHTML = '<div class="loader" style="display:block; margin-top:50px;"></div>';
+            
+            try {
                 await deleteDoc(doc(db, "notes", editingNoteId));
-                noteModal.style.display = "none";
                 fetchNotesFromCloud();
+            } catch (e) {
+                console.error("Error deleting note: ", e);
             }
         });
     </script>
