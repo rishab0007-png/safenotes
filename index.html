@@ -22,56 +22,22 @@
         }
 
         body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
-        button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
+        button { cursor: pointer; border: none; outline: none; transition: 0.2s; font-family: inherit; }
         input, textarea { outline: none; font-family: inherit; }
 
-        /* --- ALL-OVER AMBIENT LIGHTING --- */
-        .ambient-light {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: radial-gradient(circle at 35% 25%, rgba(255, 235, 170, 0.5) 0%, rgba(255, 220, 140, 0.25) 40%, rgba(255, 200, 100, 0.05) 80%, transparent 100%);
-            opacity: var(--on);
-            transition: opacity 0.6s ease-in-out;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        /* --- AUTH VIEW & LAMP --- */
-        #auth-view { width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: 10; background: transparent; transition: opacity 0.5s; overflow: hidden;}
-        
+        /* --- AMBIENT LIGHTING & LAMP UI --- */
+        .ambient-light { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at 35% 25%, rgba(255, 235, 170, 0.5) 0%, rgba(255, 220, 140, 0.25) 40%, rgba(255, 200, 100, 0.05) 80%, transparent 100%); opacity: var(--on); transition: opacity 0.6s ease-in-out; pointer-events: none; z-index: 1; }
+        #auth-view { width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: 10; background: transparent; overflow: hidden; }
         .lamp-container { position: absolute; left: 25%; top: 15%; display: flex; flex-direction: column; align-items: center; z-index: 10; }
-        
-        .lamp-shade {
-            width: 180px; 
-            height: 110px; 
-            background: linear-gradient(to bottom, #fdfbf1, #e3d5a8); 
-            clip-path: polygon(25% 0, 75% 0, 100% 100%, 0 100%);
-            border-radius: 4px;
-            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.1);
-            z-index: 5; 
-            position: relative;
-        }
-        
+        .lamp-shade { width: 180px; height: 110px; background: linear-gradient(to bottom, #fdfbf1, #e3d5a8); clip-path: polygon(25% 0, 75% 0, 100% 100%, 0 100%); border-radius: 4px; box-shadow: inset 0 -10px 20px rgba(0,0,0,0.1); z-index: 5; position: relative; }
         .lamp-stand-top { width: 22px; height: 14px; background: linear-gradient(to right, #8b6914, #f4d068, #8b6914); border-radius: 4px; margin-top: 2px; }
         .lamp-stand-middle { width: 45px; height: 60px; background: linear-gradient(to right, #6b4e07, #d4af37, #6b4e07); border-radius: 50% 50% 40% 40%; }
         .lamp-stand-bottom { width: 35px; height: 35px; background: linear-gradient(to right, #8b6914, #f4d068, #8b6914); clip-path: polygon(15% 0, 85% 0, 100% 100%, 0 100%); }
         .lamp-base-pedestal { width: 65px; height: 8px; background: #b08d25; border-radius: 3px 3px 0 0; }
         .lamp-base { width: 140px; height: 15px; background: linear-gradient(to right, #5c4505, #cfa830, #5c4505); border-radius: 10px 10px 2px 2px; }
-        
-        #physics-canvas { 
-            position: absolute; 
-            top: 105px; 
-            right: 15px; 
-            width: 80px; 
-            height: 120px; 
-            z-index: 15; 
-            touch-action: none; 
-        }
+        #physics-canvas { position: absolute; top: 105px; right: 15px; width: 80px; height: 120px; z-index: 15; touch-action: none; }
 
-        /* --- LOGIN BOX --- */
+        /* --- AUTH BOX --- */
         .auth-box { position: absolute; top: 50%; left: 65%; transform: translate(-50%, -40%); background: var(--panel-bg); backdrop-filter: blur(15px); padding: 40px; border-radius: 15px; width: 340px; border: 1px solid var(--panel-border); box-shadow: 0 15px 35px rgba(0,0,0,0.6); opacity: 0; visibility: hidden; transition: all 0.5s; z-index: 5; }
         .auth-box.active { opacity: 1; transform: translate(-50%, -50%); visibility: visible; box-shadow: 0 20px 50px rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.3); }
         .auth-box h2 { text-align: center; margin-top: 0; color: var(--primary); }
@@ -83,10 +49,9 @@
         .auth-btn:hover { background: #ebd169; transform: translateY(-2px); }
         .toggle-auth { text-align: center; margin-top: 15px; font-size: 13px; color: var(--text-muted); cursor: pointer; }
         .toggle-auth:hover { color: var(--text-main); text-decoration: underline; }
-        #auth-msg { text-align: center; margin-top: 10px; font-size: 14px; color: #ff6b6b; min-height: 20px; }
 
         /* --- DASHBOARD VIEW --- */
-        #dashboard-view { display: none; padding: 30px; max-width: 1200px; margin: 0 auto; position: relative; z-index: 5; }
+        #dashboard-view { display: none; padding: 30px; max-width: 1200px; margin: 0 auto; position: relative; z-index: 5; opacity: 0; }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
         .header h1 { margin: 0; font-size: 24px; }
         .header-actions { display: flex; gap: 15px; }
@@ -114,17 +79,24 @@
         .modal-right-btns { display: flex; gap: 10px; }
         .btn-danger { background: transparent; border: 1px solid #ff6b6b; color: #ff6b6b; padding: 8px 16px; border-radius: 6px; }
         .btn-danger:hover { background: rgba(255, 107, 107, 0.1); }
-        
         .recovery-content { max-width: 400px; }
         .recovery-content h2 { color: var(--primary); margin-top: 0; text-align: center; }
-        #rec-msg { text-align: center; color: #ff6b6b; font-size: 14px; min-height: 20px; margin-bottom: 10px; }
         
+        /* --- NEW: TOAST NOTIFICATIONS UI --- */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: #1c1f26; border-left: 4px solid var(--primary); color: white; padding: 15px 20px; border-radius: 6px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); font-size: 14px; transform: translateX(120%); opacity: 0; }
+        .toast.error { border-left-color: #ff6b6b; }
+        .toast.success { border-left-color: #51cf66; }
+
+        /* --- NEW: EMPTY STATE UI --- */
+        .empty-state { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); border-radius: 10px; border: 1px dashed #333; }
+        .empty-state svg { width: 80px; height: 80px; opacity: 0.5; margin-bottom: 20px; }
+        .empty-state h3 { color: white; margin: 0 0 10px 0; }
+
         .loader { border: 4px solid rgba(0,0,0,0.1); border-left-color: #d4af37; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; margin: 0 auto; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* =========================================
-           MOBILE RESPONSIVE CSS
-           ========================================= */
+        /* --- MOBILE RESPONSIVE CSS --- */
         @media (max-width: 768px) {
             .lamp-container { left: 50%; transform: translateX(-50%); top: 8vh; }
             .ambient-light { background: radial-gradient(circle at 50% 15%, rgba(255, 235, 170, 0.5) 0%, rgba(255, 220, 140, 0.25) 50%, rgba(255, 200, 100, 0.05) 90%, transparent 100%); }
@@ -139,11 +111,15 @@
             .modal-actions { flex-direction: column-reverse; gap: 15px; }
             .modal-right-btns { width: 100%; justify-content: space-between; }
             .btn-danger { width: 100%; }
+            #toast-container { top: 10px; right: 10px; left: 10px; align-items: center; }
+            .toast { width: 100%; max-width: 400px; transform: translateY(-120%); } /* Slide down on mobile instead of from right */
         }
     </style>
 </head>
 <body>
     
+    <div id="toast-container"></div>
+
     <div class="ambient-light"></div>
 
     <div id="auth-view">
@@ -171,8 +147,6 @@
                 <span id="btn-text">Sign In</span>
                 <div class="loader" id="btn-loader"></div>
             </button>
-            <div id="auth-msg"></div>
-            
             <div class="toggle-auth" id="toggle-auth">Need an account? Sign Up here</div>
             <div class="toggle-auth" id="forgot-pass" style="color: var(--primary); margin-top: 5px;">Forgot Password?</div>
         </div>
@@ -186,7 +160,6 @@
                 <label>Email Address</label>
                 <input type="email" id="rec-email" placeholder="you@example.com">
             </div>
-            <div id="rec-msg"></div>
             <div class="modal-actions" style="flex-direction: row; justify-content: space-between;">
                 <button class="btn-outline" id="cancel-rec-btn" style="color: white; border-color: #555;">Cancel</button>
                 <button class="btn-fill" id="send-rec-btn">Send Email</button>
@@ -232,6 +205,7 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, query, where, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+        // --- FIREBASE SETUP ---
         const firebaseConfig = {
             apiKey: "AIzaSyCbBShuzkGruBWb8i0ESmnvP9bT14j9kU8",
             authDomain: "notes-app-a8a4b.firebaseapp.com",
@@ -241,18 +215,62 @@
             appId: "1:370030015432:web:46a31e2895cf247bbf86fd",
             measurementId: "G-2YSRSW8B7S"
         };
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // --- GLOBAL STATE ---
         let currentUser = null;
         let notes = [];
         let editingNoteId = null; 
         let selectedColor = "#d4af37";
         let isLoginMode = true;
 
-        // --- MATTER.JS LAMP LOGIC ---
+        // ==========================================
+        // 1. SECURITY & UTILITY FUNCTIONS
+        // ==========================================
+        
+        // Prevents XSS Attacks by escaping HTML tags before rendering
+        function escapeHTML(str) {
+            if (!str) return "";
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])
+            );
+        }
+
+        // Sleek Toast Notification System
+        function showToast(message, type = "error") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerText = message;
+            container.appendChild(toast);
+
+            // Animate In (Handle Mobile vs Desktop slide directions)
+            const isMobile = window.innerWidth <= 768;
+            gsap.to(toast, { 
+                opacity: 1, 
+                x: isMobile ? 0 : 0, 
+                y: isMobile ? 0 : 0, 
+                duration: 0.4, 
+                ease: "power2.out" 
+            });
+
+            // Animate Out & Remove after 3.5 seconds
+            setTimeout(() => {
+                gsap.to(toast, { 
+                    opacity: 0, 
+                    x: isMobile ? 0 : '120%', 
+                    y: isMobile ? '-120%' : 0, 
+                    duration: 0.4, 
+                    onComplete: () => toast.remove() 
+                });
+            }, 3500);
+        }
+
+        // ==========================================
+        // 2. MATTER.JS LAMP PHYSICS
+        // ==========================================
         let isOn = false;
         const root = document.documentElement;
         const authBox = document.getElementById('auth-box');
@@ -270,83 +288,46 @@
         }
 
         const Engine = Matter.Engine, Render = Matter.Render, Runner = Matter.Runner, MouseConstraint = Matter.MouseConstraint, Mouse = Matter.Mouse, Composite = Matter.Composite, Constraint = Matter.Constraint, Bodies = Matter.Bodies, Events = Matter.Events;
-        
-        const engine = Engine.create(); 
-        const world = engine.world;
+        const engine = Engine.create(); const world = engine.world;
         const canvasElement = document.getElementById('physics-canvas');
         
-        const render = Render.create({ 
-            element: canvasElement, 
-            engine: engine, 
-            options: { width: 80, height: 120, wireframes: false, background: 'transparent' } 
-        });
+        const render = Render.create({ element: canvasElement, engine: engine, options: { width: 80, height: 120, wireframes: false, background: 'transparent' } });
+        Render.run(render); Runner.run(Runner.create(), engine);
         
-        Render.run(render); 
-        Runner.run(Runner.create(), engine);
-        
-        const handle = Bodies.rectangle(40, 60, 10, 24, { 
-            chamfer: { radius: 3 }, 
-            render: { fillStyle: '#d4af37' }, 
-            density: 0.1, 
-            frictionAir: 0.08 
-        });
-        
-        const spring = Constraint.create({
-            pointA: { x: 40, y: 0 }, 
-            bodyB: handle,
-            pointB: { x: 0, y: -12 }, 
-            stiffness: 0.05, 
-            damping: 0.05,
-            render: { visible: true, strokeStyle: '#d4af37', lineWidth: 2 } 
-        });
-
+        const handle = Bodies.rectangle(40, 60, 10, 24, { chamfer: { radius: 3 }, render: { fillStyle: '#d4af37' }, density: 0.1, frictionAir: 0.08 });
+        const spring = Constraint.create({ pointA: { x: 40, y: 0 }, bodyB: handle, pointB: { x: 0, y: -12 }, stiffness: 0.05, damping: 0.05, render: { visible: true, strokeStyle: '#d4af37', lineWidth: 2 } });
         Composite.add(world, [handle, spring]);
         
         const mouse = Mouse.create(render.canvas);
-        const mouseConstraint = MouseConstraint.create(engine, { 
-            mouse: mouse, 
-            constraint: { stiffness: 0.2, render: { visible: false } } 
-        });
-        
+        const mouseConstraint = MouseConstraint.create(engine, { mouse: mouse, constraint: { stiffness: 0.2, render: { visible: false } } });
         mouseConstraint.mouse.element.removeEventListener("mousewheel", mouseConstraint.mouse.mousewheel);
         mouseConstraint.mouse.element.removeEventListener("DOMMouseScroll", mouseConstraint.mouse.mousewheel);
-        Composite.add(world, mouseConstraint); 
-        render.mouse = mouse; 
+        Composite.add(world, mouseConstraint); render.mouse = mouse; 
 
-        // --- BUG FIX: RELEASE STRING IF CURSOR LEAVES CANVAS ---
+        // Fix stuck cursor bug
         function releaseString() {
-            if (mouseConstraint.body) {
-                mouseConstraint.body = null;
-                mouseConstraint.constraint.bodyB = null;
-            }
+            if (mouseConstraint.body) { mouseConstraint.body = null; mouseConstraint.constraint.bodyB = null; }
         }
-
         window.addEventListener('mouseup', releaseString);
         window.addEventListener('touchend', releaseString);
         canvasElement.addEventListener('mouseleave', releaseString);
         
-        let restingY = 60; 
-        let isPulled = false;
-        
+        let restingY = 60; let isPulled = false;
         Events.on(engine, 'beforeUpdate', () => {
             Matter.Body.setPosition(handle, { x: 40, y: handle.position.y });
             Matter.Body.setVelocity(handle, { x: 0, y: handle.velocity.y });
-
-            if (handle.position.y > restingY + 25 && !isPulled) { 
-                isPulled = true; 
-                toggleLight(); 
-            } else if (handle.position.y < restingY + 10 && isPulled) { 
-                isPulled = false; 
-            }
+            if (handle.position.y > restingY + 25 && !isPulled) { isPulled = true; toggleLight(); } 
+            else if (handle.position.y < restingY + 10 && isPulled) { isPulled = false; }
         });
 
-        // --- AUTHENTICATION UI LOGIC ---
+        // ==========================================
+        // 3. AUTHENTICATION & VIEW ROUTING
+        // ==========================================
         const authTitle = document.getElementById('auth-title');
         const authBtn = document.getElementById('auth-btn');
         const btnText = document.getElementById('btn-text');
         const btnLoader = document.getElementById('btn-loader');
         const toggleAuthBtn = document.getElementById('toggle-auth');
-        const authMsg = document.getElementById('auth-msg');
         const forgotPassBtn = document.getElementById('forgot-pass');
 
         function setLoading(isLoading) {
@@ -361,81 +342,58 @@
             btnText.innerText = isLoginMode ? "Sign In" : "Create Account";
             toggleAuthBtn.innerText = isLoginMode ? "Need an account? Sign Up here" : "Already have an account? Sign In";
             forgotPassBtn.style.display = isLoginMode ? "block" : "none";
-            authMsg.innerText = "";
         });
 
         authBtn.addEventListener('click', () => {
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
-            authMsg.style.color = "#ff6b6b"; 
-
-            if (!email || !password) return authMsg.innerText = "Please enter email and password.";
+            
+            if (!email || !password) return showToast("Please enter email and password.", "error");
             setLoading(true);
 
             if (isLoginMode) {
-                signInWithEmailAndPassword(auth, email, password)
-                    .catch((error) => {
-                        console.error(error);
-                        setLoading(false);
-                        authMsg.innerText = "Invalid credentials. Try again.";
-                        gsap.fromTo("#auth-box", { x: "-50%", marginLeft: -10 }, { x: "-50%", marginLeft: 10, duration: 0.1, yoyo: true, repeat: 3, onComplete: () => gsap.set("#auth-box", {marginLeft: 0}) });
-                    });
+                signInWithEmailAndPassword(auth, email, password).catch((error) => {
+                    setLoading(false);
+                    showToast("Invalid credentials. Please try again.", "error");
+                    gsap.fromTo("#auth-box", { x: "-50%", marginLeft: -10 }, { x: "-50%", marginLeft: 10, duration: 0.1, yoyo: true, repeat: 3, onComplete: () => gsap.set("#auth-box", {marginLeft: 0}) });
+                });
             } else {
-                createUserWithEmailAndPassword(auth, email, password)
-                    .catch((error) => {
-                        console.error(error);
-                        setLoading(false);
-                        authMsg.innerText = error.message.replace("Firebase: ", "");
-                    });
+                createUserWithEmailAndPassword(auth, email, password).catch((error) => {
+                    setLoading(false);
+                    showToast(error.message.replace("Firebase: ", ""), "error");
+                });
             }
         });
 
-        document.getElementById('forgot-pass').addEventListener('click', () => {
-            document.getElementById('recovery-modal').style.display = "flex";
-            document.getElementById('rec-msg').innerText = "";
-        });
-
-        document.getElementById('cancel-rec-btn').addEventListener('click', () => {
-            document.getElementById('recovery-modal').style.display = "none";
-        });
-
-        document.getElementById('send-rec-btn').addEventListener('click', () => {
-            const email = document.getElementById('rec-email').value.trim();
-            if(!email) return document.getElementById('rec-msg').innerText = "Enter your email.";
-            
-            sendPasswordResetEmail(auth, email)
-                .then(() => {
-                    document.getElementById('recovery-modal').style.display = "none";
-                    authMsg.style.color = "#51cf66";
-                    authMsg.innerText = "Password reset email sent! Check your inbox.";
-                })
-                .catch((error) => {
-                    document.getElementById('rec-msg').innerText = "Email not found or invalid.";
-                });
-        });
-
-        // --- FIREBASE AUTH STATE LOGIC ---
+        // Handle View Changes with Smooth GSAP Animations
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
                 document.getElementById('display-user').innerText = `(${user.email})`;
                 document.getElementById('email').value = ""; document.getElementById('password').value = "";
                 setLoading(false);
-                document.getElementById('auth-view').style.opacity = "0";
-                setTimeout(() => {
+                
+                // Cinematic Transition In
+                gsap.to('#auth-view', { opacity: 0, duration: 0.5, onComplete: () => {
                     document.getElementById('auth-view').style.display = "none";
                     document.getElementById('dashboard-view').style.display = "block";
+                    gsap.fromTo('#dashboard-view', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" });
                     fetchNotesFromCloud();
-                }, 500);
+                }});
             } else {
                 currentUser = null;
-                document.getElementById('dashboard-view').style.display = "none";
-                document.getElementById('auth-view').style.display = "block";
-                document.getElementById('auth-view').style.opacity = "1";
+                // Transition Out
+                gsap.to('#dashboard-view', { opacity: 0, duration: 0.3, onComplete: () => {
+                    document.getElementById('dashboard-view').style.display = "none";
+                    document.getElementById('auth-view').style.display = "block";
+                    gsap.to('#auth-view', { opacity: 1, duration: 0.5 });
+                }});
             }
         });
 
-        // --- NOTES CRUD LOGIC ---
+        // ==========================================
+        // 4. NOTES CRUD & UI LOGIC
+        // ==========================================
         const notesGrid = document.getElementById('notes-grid');
         const noteModal = document.getElementById('note-modal');
         const modalTitle = document.getElementById('modal-title');
@@ -446,16 +404,10 @@
         document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
 
         document.getElementById('new-note-btn').addEventListener('click', () => {
-            editingNoteId = null;
-            modalTitle.value = "";
-            modalBody.value = "";
-            deleteNoteBtn.style.display = "none";
-            noteModal.style.display = "flex";
+            editingNoteId = null; modalTitle.value = ""; modalBody.value = ""; deleteNoteBtn.style.display = "none"; noteModal.style.display = "flex";
         });
 
-        document.getElementById('close-modal-btn').addEventListener('click', () => {
-            noteModal.style.display = "none";
-        });
+        document.getElementById('close-modal-btn').addEventListener('click', () => noteModal.style.display = "none");
 
         colorDots.forEach(dot => {
             dot.addEventListener('click', (e) => {
@@ -472,32 +424,40 @@
                 const q = query(collection(db, "notes"), where("userId", "==", currentUser.uid));
                 const querySnapshot = await getDocs(q);
                 notes = [];
-                querySnapshot.forEach((doc) => {
-                    notes.push({ id: doc.id, ...doc.data() });
-                });
-                
+                querySnapshot.forEach((doc) => { notes.push({ id: doc.id, ...doc.data() }); });
                 notes.sort((a, b) => b.createdAt - a.createdAt);
                 renderNotes();
             } catch (e) {
-                console.error("Error fetching notes: ", e);
-                notesGrid.innerHTML = '<p style="color:#ff6b6b">Error loading notes.</p>';
+                console.error(e);
+                showToast("Failed to load notes.", "error");
             }
         }
 
         function renderNotes() {
             notesGrid.innerHTML = "";
+            
+            // Premium Empty State
             if (notes.length === 0) {
-                notesGrid.innerHTML = '<p style="color:var(--text-muted);">No notes yet. Click "+ Add Note" to create one.</p>';
+                notesGrid.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h3>It's pretty quiet here</h3>
+                        <p>Click "+ Add Note" in the top right to create your first note.</p>
+                    </div>`;
                 return;
             }
+
             notes.forEach(note => {
                 const tile = document.createElement('div');
                 tile.className = "note-tile";
                 tile.style.borderColor = "#2a2e38";
                 tile.style.borderLeftColor = note.color;
+                // Using escapeHTML for security
                 tile.innerHTML = `
-                    <h3 class="note-title">${note.title || "Untitled"}</h3>
-                    <div class="note-preview">${note.content}</div>
+                    <h3 class="note-title">${escapeHTML(note.title) || "Untitled"}</h3>
+                    <div class="note-preview">${escapeHTML(note.content)}</div>
                     <div class="note-date">${new Date(note.createdAt).toLocaleDateString()}</div>
                 `;
                 tile.addEventListener('click', () => openEditModal(note));
@@ -510,9 +470,7 @@
             modalTitle.value = note.title;
             modalBody.value = note.content;
             selectedColor = note.color || "#d4af37";
-            colorDots.forEach(d => {
-                d.classList.toggle('active', d.getAttribute('data-color') === selectedColor);
-            });
+            colorDots.forEach(d => d.classList.toggle('active', d.getAttribute('data-color') === selectedColor));
             deleteNoteBtn.style.display = "block";
             noteModal.style.display = "flex";
         }
@@ -521,13 +479,10 @@
             if (!currentUser) return;
             const title = modalTitle.value.trim();
             const content = modalBody.value.trim();
-            if (!content && !title) return;
+            if (!content && !title) { showToast("Cannot save an empty note.", "error"); return; }
 
             const noteData = {
-                userId: currentUser.uid,
-                title: title,
-                content: content,
-                color: selectedColor,
+                userId: currentUser.uid, title: title, content: content, color: selectedColor,
                 createdAt: editingNoteId ? notes.find(n => n.id === editingNoteId).createdAt : Date.now()
             };
 
@@ -535,28 +490,33 @@
             notesGrid.innerHTML = '<div class="loader" style="display:block; margin-top:50px;"></div>';
 
             try {
-                if (editingNoteId) {
-                    await updateDoc(doc(db, "notes", editingNoteId), noteData);
-                } else {
-                    await addDoc(collection(db, "notes"), noteData);
-                }
+                if (editingNoteId) { await updateDoc(doc(db, "notes", editingNoteId), noteData); showToast("Note updated successfully", "success"); } 
+                else { await addDoc(collection(db, "notes"), noteData); showToast("Note created successfully", "success"); }
                 fetchNotesFromCloud();
-            } catch (e) {
-                console.error("Error saving note: ", e);
-            }
+            } catch (e) { showToast("Error saving note.", "error"); }
         });
 
         deleteNoteBtn.addEventListener('click', async () => {
             if (!editingNoteId) return;
             noteModal.style.display = "none";
             notesGrid.innerHTML = '<div class="loader" style="display:block; margin-top:50px;"></div>';
-            
             try {
                 await deleteDoc(doc(db, "notes", editingNoteId));
+                showToast("Note deleted", "success");
                 fetchNotesFromCloud();
-            } catch (e) {
-                console.error("Error deleting note: ", e);
-            }
+            } catch (e) { showToast("Error deleting note.", "error"); }
+        });
+
+        // Password Reset Handling
+        document.getElementById('forgot-pass').addEventListener('click', () => { document.getElementById('recovery-modal').style.display = "flex"; });
+        document.getElementById('cancel-rec-btn').addEventListener('click', () => { document.getElementById('recovery-modal').style.display = "none"; });
+        document.getElementById('send-rec-btn').addEventListener('click', () => {
+            const email = document.getElementById('rec-email').value.trim();
+            if(!email) return showToast("Enter your email address.", "error");
+            sendPasswordResetEmail(auth, email).then(() => {
+                document.getElementById('recovery-modal').style.display = "none";
+                showToast("Password reset email sent! Check your inbox.", "success");
+            }).catch(() => showToast("Email not found or invalid.", "error"));
         });
     </script>
 </body>
