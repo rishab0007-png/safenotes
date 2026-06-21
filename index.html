@@ -231,7 +231,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, query, where, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-        // IMPORT STORAGE
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 
         const firebaseConfig = {
@@ -247,7 +246,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const storage = getStorage(app); // INITIALIZE STORAGE
+        const storage = getStorage(app); 
 
         // --- GLOBAL STATE ---
         let currentUser = null;
@@ -262,9 +261,7 @@
         
         function escapeHTML(str) {
             if (!str) return "";
-            return str.replace(/[&<>'"]/g, 
-                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])
-            );
+            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
         }
 
         function showToast(message, type = "error") {
@@ -321,34 +318,21 @@
         Render.run(render);
         Runner.run(Runner.create(), engine);
         
-        const handle = Bodies.rectangle(40, 60, 10, 24, {
-            chamfer: { radius: 3 }, render: { fillStyle: '#d4af37' }, density: 0.1, frictionAir: 0.08
-        });
-        const spring = Constraint.create({
-            pointA: { x: 40, y: 0 }, bodyB: handle, pointB: { x: 0, y: -12 },
-            stiffness: 0.05, damping: 0.05, render: { visible: true, strokeStyle: '#d4af37', lineWidth: 2 }
-        });
+        const handle = Bodies.rectangle(40, 60, 10, 24, { chamfer: { radius: 3 }, render: { fillStyle: '#d4af37' }, density: 0.1, frictionAir: 0.08 });
+        const spring = Constraint.create({ pointA: { x: 40, y: 0 }, bodyB: handle, pointB: { x: 0, y: -12 }, stiffness: 0.05, damping: 0.05, render: { visible: true, strokeStyle: '#d4af37', lineWidth: 2 } });
         Composite.add(world, [handle, spring]);
         
         const mouse = Mouse.create(render.canvas);
-        const mouseConstraint = MouseConstraint.create(engine, {
-            mouse: mouse, constraint: { stiffness: 0.2, render: { visible: false } }
-        });
+        const mouseConstraint = MouseConstraint.create(engine, { mouse: mouse, constraint: { stiffness: 0.2, render: { visible: false } } });
         mouseConstraint.mouse.element.removeEventListener("mousewheel", mouseConstraint.mouse.mousewheel);
         mouseConstraint.mouse.element.removeEventListener("DOMMouseScroll", mouseConstraint.mouse.mousewheel);
         Composite.add(world, mouseConstraint);
         render.mouse = mouse;
 
-        function releaseString() {
-            if (mouseConstraint.body) {
-                mouseConstraint.body = null;
-                mouseConstraint.constraint.bodyB = null;
-            }
-        }
+        function releaseString() { if (mouseConstraint.body) { mouseConstraint.body = null; mouseConstraint.constraint.bodyB = null; } }
         window.addEventListener('mouseup', releaseString);
         window.addEventListener('touchend', releaseString);
         canvasElement.addEventListener('mouseleave', releaseString);
-
         render.canvas.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
         render.canvas.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
         
@@ -357,12 +341,8 @@
         Events.on(engine, 'beforeUpdate', () => {
             Matter.Body.setPosition(handle, { x: 40, y: handle.position.y });
             Matter.Body.setVelocity(handle, { x: 0, y: handle.velocity.y });
-            if (handle.position.y > restingY + 25 && !isPulled) {
-                isPulled = true;
-                toggleLight();
-            } else if (handle.position.y < restingY + 10 && isPulled) {
-                isPulled = false;
-            }
+            if (handle.position.y > restingY + 25 && !isPulled) { isPulled = true; toggleLight(); } 
+            else if (handle.position.y < restingY + 10 && isPulled) { isPulled = false; }
         });
 
         // ==========================================
@@ -400,10 +380,7 @@
                 signInWithEmailAndPassword(auth, email, password).catch(() => {
                     setLoading(false);
                     showToast("Invalid credentials. Please try again.", "error");
-                    gsap.fromTo("#auth-box-inner",
-                        { x: -10 },
-                        { x: 10, duration: 0.08, yoyo: true, repeat: 5, onComplete: () => gsap.set("#auth-box-inner", { x: 0 }) }
-                    );
+                    gsap.fromTo("#auth-box-inner", { x: -10 }, { x: 10, duration: 0.08, yoyo: true, repeat: 5, onComplete: () => gsap.set("#auth-box-inner", { x: 0 }) });
                 });
             } else {
                 createUserWithEmailAndPassword(auth, email, password).catch((error) => {
@@ -417,17 +394,13 @@
             if (user) {
                 currentUser = user;
                 document.getElementById('display-user').innerText = `(${user.email})`;
-                document.getElementById('email').value = "";
-                document.getElementById('password').value = "";
+                document.getElementById('email').value = ""; document.getElementById('password').value = "";
                 setLoading(false);
                 
                 gsap.to('#auth-view', { opacity: 0, duration: 0.5, onComplete: () => {
                     document.getElementById('auth-view').style.display = "none";
                     document.getElementById('dashboard-view').style.display = "block";
-                    gsap.fromTo('#dashboard-view',
-                        { opacity: 0, y: 30 },
-                        { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
-                    );
+                    gsap.fromTo('#dashboard-view', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" });
                     fetchNotesFromCloud();
                 }});
             } else {
@@ -457,16 +430,12 @@
         const imagePreviewContainer = document.getElementById('image-preview-container');
         const imagePreview = document.getElementById('image-preview');
         const removeImageBtn = document.getElementById('remove-image-btn');
-        const downloadImageBtn = document.getElementById('download-image-btn'); // NEW BUTTON
+        const downloadImageBtn = document.getElementById('download-image-btn'); 
         
         let currentFile = null;
         let existingImageUrl = null;
 
-        // Image Listeners
-        triggerUploadBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            imageInput.click();
-        });
+        triggerUploadBtn.addEventListener('click', (e) => { e.preventDefault(); imageInput.click(); });
 
         imageInput.addEventListener('change', (e) => {
             if (e.target.files && e.target.files[0]) {
@@ -474,104 +443,48 @@
                 imagePreview.src = URL.createObjectURL(currentFile);
                 triggerUploadBtn.style.display = "none";
                 imagePreviewContainer.style.display = "block";
-                downloadImageBtn.style.display = "flex"; // Show download button
+                downloadImageBtn.style.display = "flex"; 
             }
         });
 
         removeImageBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            currentFile = null;
-            existingImageUrl = null;
-            imageInput.value = "";
-            imagePreview.src = "";
-            imagePreviewContainer.style.display = "none";
-            triggerUploadBtn.style.display = "block";
+            currentFile = null; existingImageUrl = null; imageInput.value = ""; imagePreview.src = "";
+            imagePreviewContainer.style.display = "none"; triggerUploadBtn.style.display = "block";
         });
 
-        // --- NEW DOWNLOAD LOGIC ---
         downloadImageBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             const urlToDownload = existingImageUrl || (currentFile ? URL.createObjectURL(currentFile) : null);
             if (!urlToDownload) return;
-
             showToast("Starting download...", "success");
-            
             try {
-                const response = await fetch(urlToDownload);
-                const blob = await response.blob();
+                const response = await fetch(urlToDownload); const blob = await response.blob();
                 const downloadUrl = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = downloadUrl;
+                const a = document.createElement('a'); a.style.display = 'none'; a.href = downloadUrl;
                 a.download = "CloudNote_Image_" + Date.now() + ".png";
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(downloadUrl);
-                a.remove();
-            } catch(err) {
-                // If Firebase CORS security blocks the silent fetch, fallback to opening the full image safely in a new tab
-                window.open(urlToDownload, '_blank');
-            }
+                document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(downloadUrl); a.remove();
+            } catch(err) { window.open(urlToDownload, '_blank'); }
         });
 
-        modalBody.addEventListener('input', () => {
-            charCountDisplay.textContent = modalBody.value.length.toLocaleString();
-        });
-
+        modalBody.addEventListener('input', () => { charCountDisplay.textContent = modalBody.value.length.toLocaleString(); });
         document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
 
-        // Header + Add Photo Button
-        document.getElementById('new-photo-btn').addEventListener('click', () => {
-            editingNoteId = null;
-            modalTitle.value = "";
-            modalBody.value = "";
-            charCountDisplay.textContent = "0";
-            
-            colorDots.forEach(d => d.classList.remove('active'));
-            colorDots[0].classList.add('active');
+        function resetModalState() {
+            editingNoteId = null; modalTitle.value = ""; modalBody.value = ""; charCountDisplay.textContent = "0";
+            colorDots.forEach(d => d.classList.remove('active')); colorDots[0].classList.add('active');
             selectedColor = colorDots[0].getAttribute('data-color');
-            
-            currentFile = null;
-            existingImageUrl = null;
-            imageInput.value = "";
-            imagePreviewContainer.style.display = "none";
-            triggerUploadBtn.style.display = "block";
+            currentFile = null; existingImageUrl = null; imageInput.value = ""; imagePreviewContainer.style.display = "none";
+            triggerUploadBtn.style.display = "block"; deleteNoteBtn.style.display = "none"; noteModal.style.display = "flex";
+        }
 
-            deleteNoteBtn.style.display = "none";
-            noteModal.style.display = "flex";
-
-            imageInput.click();
-        });
-
-        // Header + Add Note Button
-        document.getElementById('new-note-btn').addEventListener('click', () => {
-            editingNoteId = null;
-            modalTitle.value = "";
-            modalBody.value = "";
-            charCountDisplay.textContent = "0";
-            
-            colorDots.forEach(d => d.classList.remove('active'));
-            colorDots[0].classList.add('active');
-            selectedColor = colorDots[0].getAttribute('data-color');
-            
-            currentFile = null;
-            existingImageUrl = null;
-            imageInput.value = "";
-            imagePreviewContainer.style.display = "none";
-            triggerUploadBtn.style.display = "block";
-
-            deleteNoteBtn.style.display = "none";
-            noteModal.style.display = "flex";
-        });
-
-        document.getElementById('close-modal-btn').addEventListener('click', () => {
-            noteModal.style.display = "none";
-        });
+        document.getElementById('new-photo-btn').addEventListener('click', () => { resetModalState(); imageInput.click(); });
+        document.getElementById('new-note-btn').addEventListener('click', () => { resetModalState(); });
+        document.getElementById('close-modal-btn').addEventListener('click', () => { noteModal.style.display = "none"; });
 
         colorDots.forEach(dot => {
             dot.addEventListener('click', (e) => {
-                colorDots.forEach(d => d.classList.remove('active'));
-                e.target.classList.add('active');
+                colorDots.forEach(d => d.classList.remove('active')); e.target.classList.add('active');
                 selectedColor = e.target.getAttribute('data-color');
             });
         });
@@ -581,176 +494,99 @@
             notesGrid.innerHTML = '<div class="loader" style="display:block; margin-top:50px;"></div>';
             try {
                 const q = query(collection(db, "notes"), where("userId", "==", currentUser.uid));
-                const querySnapshot = await getDocs(q);
-                notes = [];
+                const querySnapshot = await getDocs(q); notes = [];
                 querySnapshot.forEach((d) => { notes.push({ id: d.id, ...d.data() }); });
-                notes.sort((a, b) => b.createdAt - a.createdAt);
-                renderNotes();
-            } catch (e) {
-                console.error(e);
-                showToast("Failed to load notes.", "error");
-            }
+                notes.sort((a, b) => b.createdAt - a.createdAt); renderNotes();
+            } catch (e) { console.error(e); showToast("Failed to load notes.", "error"); }
         }
 
         function renderNotes() {
             notesGrid.innerHTML = "";
-            
             if (notes.length === 0) {
-                notesGrid.innerHTML = `
-                    <div class="empty-state">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        <h3>It's pretty quiet here</h3>
-                        <p>Click "+ Add Note" or "+ Add Photo" in the top right to get started.</p>
-                    </div>`;
+                notesGrid.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke-linecap="round" stroke-linejoin="round"/></svg><h3>It's pretty quiet here</h3><p>Click "+ Add Note" or "+ Add Photo" in the top right to get started.</p></div>`;
                 return;
             }
-
             notes.forEach(note => {
-                const tile = document.createElement('div');
-                tile.className = "note-tile";
-                tile.style.borderColor = "#2a2e38";
-                tile.style.borderLeftColor = note.color;
-                
+                const tile = document.createElement('div'); tile.className = "note-tile";
+                tile.style.borderColor = "#2a2e38"; tile.style.borderLeftColor = note.color;
                 const imageHTML = note.imageUrl ? `<img src="${escapeHTML(note.imageUrl)}" class="note-cover-image" alt="Saved Photo">` : '';
-
-                tile.innerHTML = `
-                    ${imageHTML}
-                    <h3 class="note-title">${escapeHTML(note.title) || "Untitled"}</h3>
-                    <div class="note-preview">${escapeHTML(note.content)}</div>
-                    <div class="note-date">${new Date(note.createdAt).toLocaleDateString()}</div>
-                `;
-                tile.addEventListener('click', () => openEditModal(note));
-                notesGrid.appendChild(tile);
+                tile.innerHTML = `${imageHTML}<h3 class="note-title">${escapeHTML(note.title) || "Untitled"}</h3><div class="note-preview">${escapeHTML(note.content)}</div><div class="note-date">${new Date(note.createdAt).toLocaleDateString()}</div>`;
+                tile.addEventListener('click', () => openEditModal(note)); notesGrid.appendChild(tile);
             });
         }
 
         function openEditModal(note) {
-            editingNoteId = note.id;
-            modalTitle.value = note.title;
-            modalBody.value = note.content;
-            charCountDisplay.textContent = note.content ? note.content.length.toLocaleString() : "0";
-            selectedColor = note.color || "#d4af37";
-
+            editingNoteId = note.id; modalTitle.value = note.title; modalBody.value = note.content;
+            charCountDisplay.textContent = note.content ? note.content.length.toLocaleString() : "0"; selectedColor = note.color || "#d4af37";
             let matched = false;
-            colorDots.forEach(d => {
-                const isMatch = d.getAttribute('data-color') === selectedColor;
-                d.classList.toggle('active', isMatch);
-                if (isMatch) matched = true;
-            });
-            if (!matched) {
-                colorDots[0].classList.add('active');
-                selectedColor = colorDots[0].getAttribute('data-color');
-            }
-
-            // Load Existing Image
+            colorDots.forEach(d => { const isMatch = d.getAttribute('data-color') === selectedColor; d.classList.toggle('active', isMatch); if (isMatch) matched = true; });
+            if (!matched) { colorDots[0].classList.add('active'); selectedColor = colorDots[0].getAttribute('data-color'); }
             currentFile = null;
             if (note.imageUrl) {
-                existingImageUrl = note.imageUrl;
-                imagePreview.src = note.imageUrl;
-                triggerUploadBtn.style.display = "none";
-                imagePreviewContainer.style.display = "block";
-                downloadImageBtn.style.display = "flex"; // Make sure download button shows
+                existingImageUrl = note.imageUrl; imagePreview.src = note.imageUrl;
+                triggerUploadBtn.style.display = "none"; imagePreviewContainer.style.display = "block"; downloadImageBtn.style.display = "flex";
             } else {
-                existingImageUrl = null;
-                imagePreviewContainer.style.display = "none";
-                triggerUploadBtn.style.display = "block";
-                downloadImageBtn.style.display = "none";
+                existingImageUrl = null; imagePreviewContainer.style.display = "none"; triggerUploadBtn.style.display = "block"; downloadImageBtn.style.display = "none";
             }
-
-            deleteNoteBtn.style.display = "block";
-            noteModal.style.display = "flex";
+            deleteNoteBtn.style.display = "block"; noteModal.style.display = "flex";
         }
 
         document.getElementById('save-note-btn').addEventListener('click', async () => {
             if (!currentUser) return;
-            const title = modalTitle.value.trim();
-            const content = modalBody.value.trim();
+            const title = modalTitle.value.trim(); const content = modalBody.value.trim();
 
-            if (!content && !title && !currentFile && !existingImageUrl) { 
-                showToast("Cannot save an empty note.", "error"); return; 
-            }
-
-            if (title.length > 200) { showToast("Title is too long (max 200 characters).", "error"); return; }
-            if (content.length > 20000) { showToast("Note body is too long (max 20,000 characters).", "error"); return; }
+            if (!content && !title && !currentFile && !existingImageUrl) { showToast("Cannot save an empty note.", "error"); return; }
+            if (title.length > 200) { showToast("Title is too long.", "error"); return; }
+            if (content.length > 20000) { showToast("Note body is too long.", "error"); return; }
 
             noteModal.style.display = "none";
             notesGrid.innerHTML = '<div class="loader" style="display:block; margin-top:50px;"></div>';
 
             try {
                 let finalImageUrl = existingImageUrl;
-
                 if (currentFile) {
-                    showToast("Uploading original image to secure vault...", "success");
+                    showToast("Uploading original image... This may take a few seconds.", "success");
                     const fileRef = ref(storage, `notes_images/${currentUser.uid}/${Date.now()}_${currentFile.name}`);
                     await uploadBytes(fileRef, currentFile);
                     finalImageUrl = await getDownloadURL(fileRef);
                 }
 
                 const noteData = {
-                    userId: currentUser.uid,
-                    title: title,
-                    content: content,
-                    color: selectedColor,
-                    imageUrl: finalImageUrl, 
+                    userId: currentUser.uid, title: title, content: content, color: selectedColor, imageUrl: finalImageUrl, 
                     createdAt: editingNoteId ? notes.find(n => n.id === editingNoteId).createdAt : Date.now()
                 };
 
-                if (editingNoteId) {
-                    await updateDoc(doc(db, "notes", editingNoteId), noteData);
-                    showToast("Saved successfully", "success");
-                } else {
-                    await addDoc(collection(db, "notes"), noteData);
-                    showToast("Saved successfully", "success");
-                }
+                if (editingNoteId) { await updateDoc(doc(db, "notes", editingNoteId), noteData); } 
+                else { await addDoc(collection(db, "notes"), noteData); }
+                showToast("Saved successfully!", "success");
+                
                 fetchNotesFromCloud();
             } catch (e) {
-                console.error(e);
-                showToast("Error saving.", "error");
+                console.error("FIREBASE ERROR:", e);
+                showToast("Upload blocked! Check Firebase Storage rules.", "error");
+                fetchNotesFromCloud(); 
             }
         });
 
         deleteNoteBtn.addEventListener('click', async () => {
             if (!editingNoteId) return;
-            noteModal.style.display = "none";
-            notesGrid.innerHTML = '<div class="loader" style="display:block; margin-top:50px;"></div>';
-            try {
-                await deleteDoc(doc(db, "notes", editingNoteId));
-                showToast("Deleted", "success");
-                fetchNotesFromCloud();
-            } catch (e) {
-                showToast("Error deleting.", "error");
-            }
+            noteModal.style.display = "none"; notesGrid.innerHTML = '<div class="loader" style="display:block; margin-top:50px;"></div>';
+            try { await deleteDoc(doc(db, "notes", editingNoteId)); showToast("Deleted", "success"); fetchNotesFromCloud(); } 
+            catch (e) { showToast("Error deleting.", "error"); fetchNotesFromCloud(); }
         });
 
-        // Password Reset Handling
-        document.getElementById('forgot-pass').addEventListener('click', () => {
-            document.getElementById('rec-email').value = '';
-            document.getElementById('recovery-modal').style.display = "flex";
-        });
-
-        document.getElementById('cancel-rec-btn').addEventListener('click', () => {
-            document.getElementById('recovery-modal').style.display = "none";
-        });
-
+        document.getElementById('forgot-pass').addEventListener('click', () => { document.getElementById('rec-email').value = ''; document.getElementById('recovery-modal').style.display = "flex"; });
+        document.getElementById('cancel-rec-btn').addEventListener('click', () => { document.getElementById('recovery-modal').style.display = "none"; });
         document.getElementById('send-rec-btn').addEventListener('click', () => {
             const email = document.getElementById('rec-email').value.trim();
             if (!email) return showToast("Enter your email address.", "error");
-            sendPasswordResetEmail(auth, email).then(() => {
-                document.getElementById('recovery-modal').style.display = "none";
-                showToast("Password reset email sent! Check your inbox.", "success");
-            }).catch(() => showToast("Email not found or invalid.", "error"));
+            sendPasswordResetEmail(auth, email).then(() => { document.getElementById('recovery-modal').style.display = "none"; showToast("Password reset email sent!", "success"); }).catch(() => showToast("Email not found.", "error"));
         });
-
-        // Escape Key Handling
         document.addEventListener('keydown', (e) => {
             if (e.key !== 'Escape') return;
             if (noteModal.style.display === 'flex') noteModal.style.display = 'none';
-            if (document.getElementById('recovery-modal').style.display === 'flex')
-                document.getElementById('recovery-modal').style.display = 'none';
+            if (document.getElementById('recovery-modal').style.display === 'flex') document.getElementById('recovery-modal').style.display = 'none';
         });
-
     </script>
 </body>
 </html>
